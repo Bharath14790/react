@@ -1,10 +1,15 @@
 import{ Homepage } from './pages/homepg';
+import { Routes, Route } from 'react-router-dom';
 import './App.css'
 
 function App() {
 
   return (
-   <Homepage />
+  <Routes>
+    <Route path = "/" element={<Homepage />}></Route>
+    <Route path = "checkout" element={ <div> vanguard vagabond </div> }></Route>
+  </Routes>
+   
   )
 }
 
