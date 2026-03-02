@@ -25,7 +25,7 @@
   }
 }
 
-.header .header-link {
+.header .header-Link {
   display: inline-block;
   padding: 6px 9.5px;
   border-radius: 2px;
@@ -34,7 +34,7 @@
   border: 1px solid rgba(0, 0, 0, 0);
 }
 
-.header .header-link:hover {
+.header .header-Link:hover {
   border: 1px solid white;
 }
 
@@ -103,7 +103,7 @@
   justify-content: end;
 }
 
-.header .orders-link {
+.header .orders-Link {
   color: white;
 
   display: flex;
@@ -118,7 +118,7 @@
   font-weight: 700;
 }
 
-.header .cart-link {
+.header .cart-Link {
   color: white;
   display: flex;
   align-items: center;
