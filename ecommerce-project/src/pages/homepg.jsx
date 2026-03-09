@@ -4,17 +4,13 @@ import './home.css'
 import { Header } from '../component/header'
 import { products } from '../starting-project/data/products'
 
-export function Homepage() {
+export function Homepage({cart}) {
     const [products, setproducts] = useState([])
-    const [cart, setcart] = useState([])
+    
     useEffect(() =>{
         axios.get('/api/products')
         .then((response) => {
             setproducts(response.data)
-        })
-        axios.get('/api/cart-items')
-        .then((response) => {
-            setcart(response.data)
         })
     }, [])
     
