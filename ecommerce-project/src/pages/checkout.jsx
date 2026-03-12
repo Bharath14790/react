@@ -1,23 +1,24 @@
 import './checkout-header.css'
 import './checkout.css'
-import {useState, useEffect} from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios';
 import dayjs from 'dayjs';
 import { formatMoney } from '../utils/money';
 
-export function Checkout({cart}) {
-    const[deliveryoption, setdeliveryoption] = useState([])
-    const[paymentsummary, setpaymentsummary] = useState(null)
+export function Checkout({ cart, loadcart }) {
+    const [deliveryoption, setdeliveryoption] = useState([])
+    const [paymentsummary, setpaymentsummary] = useState(null)
     useEffect(() => {
-        axios("/api/delivery-options?expand=estimatedDeliveryTime")
-        .then((response) => {
-            setdeliveryoption(response.data)
-        })
-        axios("/api/payment-summary")
-        .then((response) => {
-            setpaymentsummary(response.data)
-        })
-    }, [])
+        const fetchcheckoutdata = async () => {
+        let response = await  axios.get("/api/delivery-options?expand=estimatedDeliveryTime")
+             setdeliveryoption(response.data)
+        
+         response =  await axios.get("/api/payment-summary")
+                setpaymentsummary(response.data)
+        }
+        fetchcheckoutdata()
+    }, [cart])
+
     return (
         <>
             <title>Checkout</title>
@@ -46,24 +47,28 @@ export function Checkout({cart}) {
 
                 <div className="checkout-grid">
                     <div className="order-summary">
-                        
-                        {cart.map((cartitem) => {
-                            const selecteddeliveryoption = deliveryoption
-                            .find((deliveryOption) => {
-                                    return deliveryOption.id === cartitem.deliveryOptionId
-                            })
 
-                            
+                        {deliveryoption.length > 0 && cart.map((cartitem) => {
+                            const selecteddeliveryoption = deliveryoption
+                                .find((deliveryOption) => {
+                                    return deliveryOption.id === cartitem.deliveryOptionId
+                                })
+                                const deletecartitem = async() => {
+                                   await  axios.delete(`/api/cart-items/${cartitem.productId}`)
+                                   await loadcart()
+                                }
+                                
+
                             return (
-                                <div key = {cartitem.productId}className="cart-item-container">
+                                <div key={cartitem.productId} className="cart-item-container">
                                     <div className="delivery-date">
-                                        Delivery date:{dayjs(selecteddeliveryoption.estimatedDeliveryTimeMs).format('dddd, MMMM, D')} 
-                                        
+                                        Delivery date:{dayjs(selecteddeliveryoption.estimatedDeliveryTimeMs).format('dddd, MMMM, D')}
+
                                     </div>
 
                                     <div className="cart-item-details-grid">
                                         <img className="product-image"
-                                            src={cartitem.product.image}/>
+                                            src={cartitem.product.image} />
 
                                         <div className="cart-item-details">
                                             <div className="product-name">
@@ -76,10 +81,10 @@ export function Checkout({cart}) {
                                                 <span>
                                                     Quantity: <span className="quantity-label">{cartitem.quantity}</span>
                                                 </span>
-                                                <span className="update-quantity-link link-primary">
+                                                <span className="update-quantity-link link-primary" >
                                                     Update
                                                 </span>
-                                                <span className="delete-quantity-link link-primary">
+                                                <span className="delete-quantity-link link-primary" onClick={deletecartitem}>
                                                     Delete
                                                 </span>
                                             </div>
@@ -90,34 +95,42 @@ export function Checkout({cart}) {
                                                 Choose a delivery option:
                                             </div>
                                             {deliveryoption.map((deliveryOptions) => {
-                                               let pricestring = "FREE Shipping"
-                                                if(deliveryOptions.priceCents>0){
+                                                let pricestring = "FREE Shipping"
+                                                if (deliveryOptions.priceCents > 0) {
                                                     pricestring = `${formatMoney(deliveryOptions.priceCents)} - Shipping`
                                                 }
-                                                return(
-                                                   <div key = {deliveryOptions.id} className="delivery-option">
-                                                <input type="radio" defaultChecked={deliveryOptions.id === cartitem.deliveryOptionId}
-                                                    className="delivery-option-input"
-                                                    name={`delivery-option-${cartitem.productId}`}/>
-                                                <div>
-                                                    <div className="delivery-option-date">
-                                                        {dayjs(deliveryOptions.estimatedDeliveryTimeMs).format('dddd, MMMM, D')}
+                                                const updatedeliveryoption = async () => {
+                                                    await axios.put(`/api/cart-items/${cartitem.productId}`, { deliveryOptionId: deliveryOptions.id })
+                                                    await loadcart()
+                                                }
+                                                return (
+                                                    <div key={deliveryOptions.id} className="delivery-option" onClick={updatedeliveryoption}>
+                                                        <input
+                                                            type="radio"
+                                                            checked={deliveryOptions.id === cartitem.deliveryOptionId}
+                                                            onChange={() => {}}
+                                                            className="delivery-option-input"
+                                                            name={`delivery-option-${cartitem.productId}`}
+                                                        />
+                                                        <div>
+                                                            <div className="delivery-option-date">
+                                                                {dayjs(deliveryOptions.estimatedDeliveryTimeMs).format('dddd, MMMM, D')}
+                                                            </div>
+                                                            <div className="delivery-option-price">
+                                                                {pricestring}
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div className="delivery-option-price">
-                                                        {pricestring}
-                                                    </div>
-                                                </div>
-                                            </div> 
                                                 )
                                             })}
-                                            
+
                                         </div>
                                     </div>
                                 </div>
                             )
                         })}
 
-                        
+
                     </div>
 
                     <div className="payment-summary">
@@ -126,49 +139,49 @@ export function Checkout({cart}) {
                         </div>
                         {paymentsummary && (
 
-                        <>
-                        <div className="payment-summary-row">
-                            <div>({paymentsummary.totalItems}):</div>
-                            <div className="payment-summary-money">
-                                {formatMoney(paymentsummary.productCostCents)}
-                            </div>
-                        </div>
+                            <>
+                                <div className="payment-summary-row">
+                                    <div>({paymentsummary.totalItems}):</div>
+                                    <div className="payment-summary-money">
+                                        {formatMoney(paymentsummary.productCostCents)}
+                                    </div>
+                                </div>
 
-                        <div className="payment-summary-row">
-                            <div>Shipping &amp; handling:</div>
-                            <div className="payment-summary-money">
-                                {formatMoney(paymentsummary.shippingCostCents)}
-                            </div>
-                        </div>
+                                <div className="payment-summary-row">
+                                    <div>Shipping &amp; handling:</div>
+                                    <div className="payment-summary-money">
+                                        {formatMoney(paymentsummary.shippingCostCents)}
+                                    </div>
+                                </div>
 
-                        <div className="payment-summary-row subtotal-row">
-                            <div>Total before tax:</div>
-                            <div className="payment-summary-money">
-                                {formatMoney(paymentsummary.totalCostBeforeTaxCents)}
-                            </div>
-                        </div>
+                                <div className="payment-summary-row subtotal-row">
+                                    <div>Total before tax:</div>
+                                    <div className="payment-summary-money">
+                                        {formatMoney(paymentsummary.totalCostBeforeTaxCents)}
+                                    </div>
+                                </div>
 
-                        <div className="payment-summary-row">
-                            <div>Estimated tax (10%):</div>
-                            <div className="payment-summary-money">
-                                {formatMoney(paymentsummary.TaxCents)}
-                            </div>
-                        </div>
+                                <div className="payment-summary-row">
+                                    <div>Estimated tax (10%):</div>
+                                    <div className="payment-summary-money">
+                                        {formatMoney(paymentsummary.taxCents)}
+                                    </div>
+                                </div>
 
-                        <div className="payment-summary-row total-row">
-                            <div>Order total:</div>
-                            <div className="payment-summary-money">
-                                {formatMoney(paymentsummary.totalCostCents)}
-                            </div>
-                        </div>
+                                <div className="payment-summary-row total-row">
+                                    <div>Order total:</div>
+                                    <div className="payment-summary-money">
+                                        {formatMoney(paymentsummary.totalCostCents)}
+                                    </div>
+                                </div>
 
-                        <button className="place-order-button button-primary">
-                            Place your order
-                        </button>
-                        </>
+                                <button className="place-order-button button-primary">
+                                    Place your order
+                                </button>
+                            </>
                         )}
                     </div>
-                    
+
                 </div>
             </div>
         </>
