@@ -4,10 +4,17 @@ import { useState, useEffect } from 'react'
 import axios from 'axios';
 import dayjs from 'dayjs';
 import { formatMoney } from '../utils/money';
+import { useNavigate } from 'react-router-dom';
 
 export function Checkout({ cart, loadcart }) {
     const [deliveryoption, setdeliveryoption] = useState([])
     const [paymentsummary, setpaymentsummary] = useState(null)
+    const navigate = useNavigate()
+    const createorder = async () => {
+        await  axios.post('/api/orders')
+        await loadcart()
+        await navigate('/order')
+    }
     useEffect(() => {
         const fetchcheckoutdata = async () => {
         let response = await  axios.get("/api/delivery-options?expand=estimatedDeliveryTime")
@@ -175,7 +182,7 @@ export function Checkout({ cart, loadcart }) {
                                     </div>
                                 </div>
 
-                                <button className="place-order-button button-primary">
+                                <button className="place-order-button button-primary" onClick={createorder}>
                                     Place your order
                                 </button>
                             </>

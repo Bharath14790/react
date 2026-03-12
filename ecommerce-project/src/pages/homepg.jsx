@@ -9,10 +9,11 @@ export function Homepage({cart, loadcart}) {
     
     
     useEffect(() =>{
-        axios.get('/api/products')
-        .then((response) => {
-            setproducts(response.data)
-        })
+        const fetchproduct  = async() => {
+            let response  = await axios.get('/api/products')
+              setproducts(response.data)
+        }
+         fetchproduct()
     }, [])
     
     return (
