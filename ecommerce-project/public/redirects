@@ -1,0 +1,2 @@
+/api/*  https://react-production-1f2b.up.railway.app/api/:splat  200
+/images/*  https://react-production-1f2b.up.railway.app/images/:splat  200
