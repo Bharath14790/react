@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config'  // ← changed from 'vite'
+import { defineConfig } from 'vitest/config'  
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
@@ -6,14 +6,14 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3000'
+        target: 'https://react-production-1f2b.up.railway.app'
       },
       '/images': {
-        target: 'http://localhost:3000'
+        target: 'https://react-production-1f2b.up.railway.app'
       }
     }
   },
-  test: {              // ← moved OUT of server.proxy, now top-level
+  test: {             
     environment: 'jsdom',
     globals: true,
     setupFiles: './setupTest.js',
